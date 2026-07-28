@@ -1,47 +1,56 @@
 import { useState } from "react";
+
 import "./App.css";
 
 
 function App() {
 
 
-  const [prompt, setPrompt] = useState("");
-
-  const [result, setResult] = useState("");
-
-  const [previewUrl, setPreviewUrl] = useState("");
-
-  const [loading, setLoading] = useState(false);
+  const [prompt, setPrompt] =
+    useState("");
 
 
+  const [result, setResult] =
+    useState("");
 
-  const generateWebsite = async () => {
+
+  const [loading, setLoading] =
+    useState(false);
 
 
-    if (!prompt) {
+  const [projectLoading, setProjectLoading] =
+    useState(false);
 
-      alert("Please enter website idea");
+
+  // ===============================
+  // GENERATE WEBSITE / AI RESPONSE
+  // ===============================
+
+  async function generateWebsite() {
+
+
+    if (!prompt.trim()) {
+
+      alert(
+        "Please describe your website first"
+      );
 
       return;
 
     }
 
 
+    setLoading(true);
+
+    setResult("");
+
 
     try {
 
 
-      setLoading(true);
-
-      setResult("");
-
-      setPreviewUrl("");
-
-
-
       const response = await fetch(
 
-        "https://ai-builder-y6jo.onrender.com/api/generate-project",
+        "https://ai-builder-y6jo.onrender.com/api/ai",
 
         {
 
@@ -49,13 +58,14 @@ function App() {
 
           headers: {
 
-            "Content-Type": "application/json"
+            "Content-Type":
+              "application/json"
 
           },
 
           body: JSON.stringify({
 
-            prompt
+            prompt: prompt
 
           })
 
@@ -64,51 +74,37 @@ function App() {
       );
 
 
-
-      const data = await response.json();
-
+      const data =
+        await response.json();
 
 
       if (!response.ok) {
 
-
         throw new Error(
 
-          data.error || "Generation failed"
+          data.error ||
+          "AI request failed"
 
         );
-
 
       }
 
 
-
       setResult(
 
-        data.message
+        data.result ||
+        "No response received"
 
       );
 
 
-
-      if(data.previewUrl){
-
-        setPreviewUrl(
-
-          data.previewUrl
-
-        );
-
-      }
-
-
-
-    } catch(error) {
+    } catch (error) {
 
 
       setResult(
 
-        "❌ " + error.message
+        "❌ " +
+        error.message
 
       );
 
@@ -121,133 +117,256 @@ function App() {
 
     }
 
-
-  };
-
+  }
 
 
+  // ===============================
+  // GENERATE AI PROJECT
+  // ===============================
 
+  async function generateProject() {
+
+
+    if (!prompt.trim()) {
+
+      alert(
+
+        "Please describe your website first"
+
+      );
+
+      return;
+
+    }
+
+
+    setProjectLoading(true);
+
+
+    try {
+
+
+      const response = await fetch(
+  "https://ai-builder-y6jo.onrender.com/api/generate-project",
+
+        {
+
+          method: "POST",
+
+          headers: {
+
+            "Content-Type":
+              "application/json"
+
+          },
+
+          body: JSON.stringify({
+
+            prompt: prompt
+
+          })
+
+        }
+
+      );
+
+
+      const data =
+        await response.json();
+
+
+      if (!response.ok) {
+
+        throw new Error(
+
+          data.error ||
+
+          "Project generation failed"
+
+        );
+
+      }
+
+
+      alert(
+
+        "✅ " +
+        data.message
+
+      );
+
+
+      if (data.previewUrl) {
+
+        window.open(
+
+          data.previewUrl,
+
+          "_blank"
+
+        );
+
+      }
+
+
+    } catch (error) {
+
+
+      console.error(
+
+        "PROJECT ERROR:",
+
+        error
+
+      );
+
+
+      alert(
+
+        "❌ " +
+        error.message
+
+      );
+
+
+    } finally {
+
+
+      setProjectLoading(false);
+
+
+    }
+
+  }
+
+
+  // ===============================
+  // USER INTERFACE
+  // ===============================
 
   return (
 
     <div className="app">
 
 
-      <h1>
-        🧠 Ablene's AI Builder
-      </h1>
+      <div className="brand">
+  <img
+    src="1000033871.png"
+    alt="Ablene"
+    className="profile-photo"
+  />
 
+  <h1>Ablene AI Builder</h1>
+</div>
 
 
       <p>
-        Generate complete websites using AI
-      </p>
 
+        Describe the website or app
+
+        you want to build
+
+      </p>
 
 
       <textarea
 
+        placeholder=
+
+          "Example: Build a modern school management website..."
+
         value={prompt}
 
-        onChange={(e)=>
-          setPrompt(e.target.value)
-        }
+        onChange={
 
-        placeholder="Describe the website you want..."
+          (event) =>
+
+            setPrompt(
+
+              event.target.value
+
+            )
+
+        }
 
       />
 
 
-
-      <button
-
-        onClick={generateWebsite}
-
-        disabled={loading}
-
-      >
-
-        {loading
-
-          ? "Generating..."
-
-          : "Generate Website"
-
-        }
+      <div className="buttons">
 
 
-      </button>
+        <button
+
+          onClick={
+
+            generateWebsite
+
+          }
+
+          disabled={loading}
+
+        >
+
+          {loading
+
+            ? "🧠 Ablene's AI Thinking..."
+
+            : "🧠 Generate Website"
+
+          }
+
+        </button>
 
 
+        <button
 
+          onClick={
 
-      <div className="response">
+            generateProject
 
+          }
 
-        {result && (
+          disabled={projectLoading}
 
-          <h3>
+        >
 
-            {result}
+          {projectLoading
 
-          </h3>
+            ? "🤖 Ablene's AI Building..."
 
-        )}
+            : "📁 Generate Project"
 
+          }
+
+        </button>
 
 
       </div>
 
 
+      <div className="result">
 
 
+        <h2>
 
-      {previewUrl && (
+          🧠 Ablene's AI Brain Response
 
-
-        <div className="preview">
-
-
-          <h2>
-
-            🌐 Generated Website Preview
-
-          </h2>
+        </h2>
 
 
+        <pre>
 
-          <iframe
+          {result}
 
-            src={previewUrl}
-
-            width="100%"
-
-            height="700px"
-
-            title="Generated Website"
-
-            style={{
-
-              border:"1px solid #ccc",
-
-              borderRadius:"12px"
-
-            }}
-
-          />
+        </pre>
 
 
-        </div>
-
-
-      )}
-
+      </div>
 
 
     </div>
 
   );
-
 
 }
 
