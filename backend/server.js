@@ -20,7 +20,7 @@ app.use(express.json({
 
 const PORT = 5000;
 
-const GEMINI_MODEL = "gemini-2.5-flash";
+const GEMINI_MODEL = "gemini-2.0-flash";
 
 // Current Gemini model
 const GEMINI_MODEL = "gemini-3.5-flash";
