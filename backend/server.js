@@ -18,7 +18,7 @@ app.use(express.json({
 // CONFIGURATION
 // =====================================
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 const GEMINI_API_KEY =
   process.env.GEMINI_API_KEY;
@@ -577,10 +577,8 @@ IMPORTANT RULES:
 
           "Project generated successfully",
 
-        previewUrl:
-
-          "http://localhost:5000/generated-projects/my-project/index.html"
-
+       previewUrl:
+  `${req.protocol}://${req.get("host")}/generated-projects/my-project/index.html`
       });
 
     }
