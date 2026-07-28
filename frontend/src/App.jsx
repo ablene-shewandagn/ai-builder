@@ -1,56 +1,47 @@
 import { useState } from "react";
-
 import "./App.css";
 
 
 function App() {
 
 
-  const [prompt, setPrompt] =
-    useState("");
+  const [prompt, setPrompt] = useState("");
+
+  const [result, setResult] = useState("");
+
+  const [previewUrl, setPreviewUrl] = useState("");
+
+  const [loading, setLoading] = useState(false);
 
 
-  const [result, setResult] =
-    useState("");
+
+  const generateWebsite = async () => {
 
 
-  const [loading, setLoading] =
-    useState(false);
+    if (!prompt) {
 
-
-  const [projectLoading, setProjectLoading] =
-    useState(false);
-
-
-  // ===============================
-  // GENERATE WEBSITE / AI RESPONSE
-  // ===============================
-
-  async function generateWebsite() {
-
-
-    if (!prompt.trim()) {
-
-      alert(
-        "Please describe your website first"
-      );
+      alert("Please enter website idea");
 
       return;
 
     }
 
 
-    setLoading(true);
-
-    setResult("");
-
 
     try {
 
 
+      setLoading(true);
+
+      setResult("");
+
+      setPreviewUrl("");
+
+
+
       const response = await fetch(
 
-        "https://ai-builder-y6jo.onrender.com/api/ai",
+        "https://ai-builder-y6jo.onrender.com/api/generate-project",
 
         {
 
@@ -58,14 +49,13 @@ function App() {
 
           headers: {
 
-            "Content-Type":
-              "application/json"
+            "Content-Type": "application/json"
 
           },
 
           body: JSON.stringify({
 
-            prompt: prompt
+            prompt
 
           })
 
@@ -74,37 +64,51 @@ function App() {
       );
 
 
-      const data =
-        await response.json();
+
+      const data = await response.json();
+
 
 
       if (!response.ok) {
 
+
         throw new Error(
 
-          data.error ||
-          "AI request failed"
+          data.error || "Generation failed"
+
+        );
+
+
+      }
+
+
+
+      setResult(
+
+        data.message
+
+      );
+
+
+
+      if(data.previewUrl){
+
+        setPreviewUrl(
+
+          data.previewUrl
 
         );
 
       }
 
 
-      setResult(
 
-        data.result ||
-        "No response received"
-
-      );
-
-
-    } catch (error) {
+    } catch(error) {
 
 
       setResult(
 
-        "❌ " +
-        error.message
+        "❌ " + error.message
 
       );
 
@@ -117,256 +121,133 @@ function App() {
 
     }
 
-  }
 
+  };
 
-  // ===============================
-  // GENERATE AI PROJECT
-  // ===============================
 
-  async function generateProject() {
 
 
-    if (!prompt.trim()) {
-
-      alert(
-
-        "Please describe your website first"
-
-      );
-
-      return;
-
-    }
-
-
-    setProjectLoading(true);
-
-
-    try {
-
-
-      const response = await fetch(
-  "https://ai-builder-y6jo.onrender.com/api/generate-project",
-
-        {
-
-          method: "POST",
-
-          headers: {
-
-            "Content-Type":
-              "application/json"
-
-          },
-
-          body: JSON.stringify({
-
-            prompt: prompt
-
-          })
-
-        }
-
-      );
-
-
-      const data =
-        await response.json();
-
-
-      if (!response.ok) {
-
-        throw new Error(
-
-          data.error ||
-
-          "Project generation failed"
-
-        );
-
-      }
-
-
-      alert(
-
-        "✅ " +
-        data.message
-
-      );
-
-
-      if (data.previewUrl) {
-
-        window.open(
-
-          data.previewUrl,
-
-          "_blank"
-
-        );
-
-      }
-
-
-    } catch (error) {
-
-
-      console.error(
-
-        "PROJECT ERROR:",
-
-        error
-
-      );
-
-
-      alert(
-
-        "❌ " +
-        error.message
-
-      );
-
-
-    } finally {
-
-
-      setProjectLoading(false);
-
-
-    }
-
-  }
-
-
-  // ===============================
-  // USER INTERFACE
-  // ===============================
 
   return (
 
     <div className="app">
 
 
-      <div className="brand">
-  <img
-    src="1000033871.png"
-    alt="Ablene"
-    className="profile-photo"
-  />
+      <h1>
+        🧠 Ablene's AI Builder
+      </h1>
 
-  <h1>Ablene AI Builder</h1>
-</div>
 
 
       <p>
-
-        Describe the website or app
-
-        you want to build
-
+        Generate complete websites using AI
       </p>
+
 
 
       <textarea
 
-        placeholder=
-
-          "Example: Build a modern school management website..."
-
         value={prompt}
 
-        onChange={
-
-          (event) =>
-
-            setPrompt(
-
-              event.target.value
-
-            )
-
+        onChange={(e)=>
+          setPrompt(e.target.value)
         }
+
+        placeholder="Describe the website you want..."
 
       />
 
 
-      <div className="buttons">
+
+      <button
+
+        onClick={generateWebsite}
+
+        disabled={loading}
+
+      >
+
+        {loading
+
+          ? "Generating..."
+
+          : "Generate Website"
+
+        }
 
 
-        <button
-
-          onClick={
-
-            generateWebsite
-
-          }
-
-          disabled={loading}
-
-        >
-
-          {loading
-
-            ? "🧠 Ablene's AI Thinking..."
-
-            : "🧠 Generate Website"
-
-          }
-
-        </button>
+      </button>
 
 
-        <button
 
-          onClick={
 
-            generateProject
+      <div className="response">
 
-          }
 
-          disabled={projectLoading}
+        {result && (
 
-        >
+          <h3>
 
-          {projectLoading
+            {result}
 
-            ? "🤖 Ablene's AI Building..."
+          </h3>
 
-            : "📁 Generate Project"
+        )}
 
-          }
-
-        </button>
 
 
       </div>
 
 
-      <div className="result">
 
 
-        <h2>
 
-          🧠 Ablene's AI Brain Response
-
-        </h2>
+      {previewUrl && (
 
 
-        <pre>
-
-          {result}
-
-        </pre>
+        <div className="preview">
 
 
-      </div>
+          <h2>
+
+            🌐 Generated Website Preview
+
+          </h2>
+
+
+
+          <iframe
+
+            src={previewUrl}
+
+            width="100%"
+
+            height="700px"
+
+            title="Generated Website"
+
+            style={{
+
+              border:"1px solid #ccc",
+
+              borderRadius:"12px"
+
+            }}
+
+          />
+
+
+        </div>
+
+
+      )}
+
 
 
     </div>
 
   );
+
 
 }
 

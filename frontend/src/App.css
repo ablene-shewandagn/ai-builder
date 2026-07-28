@@ -178,3 +178,63 @@ pre {
   border-radius: 50%;
   border: 3px solid #2563eb;
 }
+.app {
+
+  max-width:1000px;
+
+  margin:auto;
+
+  padding:40px;
+
+  font-family:Arial;
+
+  text-align:center;
+
+}
+
+
+
+textarea {
+
+  width:90%;
+
+  height:120px;
+
+  padding:15px;
+
+  font-size:18px;
+
+  border-radius:10px;
+
+}
+
+
+
+button {
+
+  margin-top:20px;
+
+  padding:15px 30px;
+
+  font-size:18px;
+
+  cursor:pointer;
+
+  border-radius:10px;
+
+}
+
+
+
+.preview {
+
+  margin-top:40px;
+
+}
+
+
+iframe {
+
+  background:white;
+
+}
