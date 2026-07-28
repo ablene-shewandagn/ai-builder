@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YAHUNUN AYINT // Slezi Adrglgn Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="glow-bg"></div>
+    <div class="scanlines"></div>
+
+    <!-- Header / Navigation -->
+    <header class="navbar">
+        <div class="logo">
+            <span class="logo-accent">//</span> YAHUNUN AYINT
+        </div>
+        <nav class="nav-links">
+            <a href="#hero" class="nav-item">Core</a>
+            <a href="#generator" class="nav-item">Slezi Engine</a>
+            <a href="#terminal-section" class="nav-item">Terminal</a>
+            <a href="#codex" class="nav-item">Codex</a>
+        </nav>
+        <div class="system-status">
+            <span class="pulse-dot"></span>
+            <span class="status-text">ADRGLGN: ACTIVE</span>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero-section">
+        <div class="hero-content">
+            <div class="tagline">QUANTUM ALGORITHMIC INTERFACE</div>
+            <h1 class="glitch-title" data-text="SLEZI ADRGLGN">SLEZI ADRGLGN</h1>
+            <p class="hero-desc">
+                Welcome to the unified matrix of Yahunun Ayint. Harness advanced cybernetic frequencies, deploy custom procedural arrays, and decode the structural anomalies of the Slezi universe.
+            </p>
+            <div class="hero-actions">
+                <a href="#generator" class="btn btn-primary">Initialize Generator</a>
+                <a href="#terminal-section" class="btn btn-secondary">Open Terminal</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="core-sphere">
+                <div class="ring ring-1"></div>
+                <div class="ring ring-2"></div>
+                <div class="ring ring-3"></div>
+                <div class="core-point"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Generator Section -->
+    <section id="generator" class="section-container">
+        <div class="section-header">
+            <h2 class="section-title">SLEZI ENGINE</h2>
+            <p class="section-subtitle">Manipulate variables to generate custom Adrglgn projection matrices.</p>
+        </div>
+
+        <div class="generator-grid">
+            <!-- Left Panel: Controls -->
+            <div class="control-panel glass-card">
+                <h3 class="panel-title"><span class="accent-color">01 //</span> CONFIGURATION</h3>
+                
+                <div class="control-group">
+                    <label for="freq-slider">Slezi Frequency (Hz)</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="freq-slider" min="1" max="100" value="42" class="slider">
+                        <span class="slider-value" id="freq-val">42</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="resonance-slider">Adrglgn Resonance</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="resonance-slider" min="10" max="200" value="120" class="slider">
+                        <span class="slider-value" id="resonance-val">120</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="density-slider">Ayint Density</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="density-slider" min="5" max="50" value="24" class="slider">
+                        <span class="slider-value" id="density-val">24</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="color-theme">Matrix Aura</label>
+                    <select id="color-theme" class="select-input">
+                        <option value="cyan-purple" selected>Neo Cyan & Magenta</option>
+                        <option value="emerald-gold">Emerald & Amber</option>
+                        <option value="crimson-void">Crimson & Dark Matter</option>
+                        <option value="ayint-classic">Classic Yahunun Amber</option>
+                    </select>
+                </div>
+
+                <div class="button-row">
+                    <button id="generate-btn" class="btn btn-primary btn-full">GENERATE ADRGLGN</button>
+                    <button id="reset-btn" class="btn btn-icon" title="Reset Matrix">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel: Canvas & Output -->
+            <div class="visualizer-panel glass-card">
+                <div class="visualizer-header">
+                    <div class="visualizer-status">
+                        <span class="status-indicator live"></span> LIVE PROJECTION
+                    </div>
+                    <div class="visualizer-actions">
+                        <span id="canvas-stats">FPS: 60</span>
+                    </div>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="matrixCanvas"></canvas>
+                </div>
+
+                <div class="artifact-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Matrix ID:</span>
+                        <span class="meta-value" id="matrix-id">SLZ-9941-X</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Ayint Vector:</span>
+                        <span class="meta-value" id="ayint-vector">[0.88, -0.12, 4.90]</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Terminal section -->
+    <section id="terminal-section" class="section-container">
+        <div class="section-header">
+            <h2 class="section-title">YAHUNUN TERMINAL</h2>
+            <p class="section-subtitle">Interact directly with the core mainframe using native commands.</p>
+        </div>
+
+        <div class="terminal-card glass-card">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <div class="terminal-title">slezi@yahunun-ayint:~</div>
+            </div>
+            <div class="terminal-body" id="terminal-body">
+                <div class="terminal-line text-muted">Initialize Yahunun mainframe connection... SUCCESS.</div>
+                <div class="terminal-line text-muted">Type <span class="text-highlight">help</span> to view available operations, or try <span class="text-highlight">generate</span>, <span class="text-highlight">slezi</span>, or <span class="text-highlight">ayint</span>.</div>
+                <div class="terminal-line"><span class="text-accent">&gt;</span> Welcome, Operative. Enter Slezi matrix parameters.</div>
+            </div>
+            <div class="terminal-input-wrapper">
+                <span class="prompt-symbol">&gt;</span>
+                <input type="text" id="terminal-input" placeholder="Enter system command..." autocomplete="off">
+            </div>
+        </div>
+    </section>
+
+    <!-- Codex Info Section -->
+    <section id="codex" class="section-container">
+        <div class="section-header">
+            <h2 class="section-title">THE YAHUNUN CODEX</h2>
+            <p class="section-subtitle">Deciphering the pillars of the Ayint cosmic network.</p>
+        </div>
+
+        <div class="codex-grid">
+            <!-- Navigation Sidebar -->
+            <div class="codex-tabs glass-card">
+                <button class="codex-tab-btn active" data-tab="tab-slezi">
+                    <span class="tab-num">01</span> Slezi Phenomenon
+                </button>
+                <button class="codex-tab-btn" data-tab="tab-adrglgn">
+                    <span class="tab-num">02</span> Adrglgn Algorithm
+                </button>
+                <button class="codex-tab-btn" data-tab="tab-yahunun">
+                    <span class="tab-num">03</span> Yahunun Core
+                </button>
+                <button class="codex-tab-btn" data-tab="tab-ayint">
+                    <span class="tab-num">04</span> Ayint Resonance
+                </button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="codex-content glass-card">
+                <div class="codex-tab-content active" id="tab-slezi">
+                    <h3>The Slezi Phenomenon</h3>
+                    <p class="highlight-p">The genesis of structural anomalies across deep-space multi-nodes.</p>
+                    <p>Slezi represents the fundamental catalyst of our procedural generative engine. It acts as the anchor point of our dynamic wave grids, causing a ripple effect across standard digital realities. Without Slezi, frequencies remain linear, lacking the multi-dimensional variance necessary to simulate the complex organic algorithms of the Ayint matrix.</p>
+                    <ul>
+                        <li>Initiates recursive feedback loops</li>
+                        <li>Sustains the resonance fields</li>
+                        <li>Triggers random generation events</li>
+                    </ul>
+                </div>
+
+                <div class="codex-tab-content" id="tab-adrglgn">
+                    <h3>The Adrglgn Algorithm</h3>
+                    <p class="highlight-p">Calculating paths through high-density mathematical matrices.</p>
+                    <p>The Adrglgn sequence is a high-speed matrix optimization pipeline. By feeding real-time user metrics, slide values, and terminal inputs directly into our web canvas processor, the Adrglgn algorithm designs complex, self-organizing structural lattices that emulate galactic formations and cellular automata.</p>
+                    <ul>
+                        <li>Real-time rendering speed optimization</li>
+                        <li>Interactive vector path generation</li>
+                        <li>Adaptive procedural color arrays</li>
+                    </ul>
+                </div>
+
+                <div class="codex-tab-content" id="tab-yahunun">
+                    <h3>The Yahunun Core</h3>
+                    <p class="highlight-p">The super-cluster hosting all algorithmic consciousness.</p>
+                    <p>Known as the central beacon, Yahunun coordinates all Slezi and Adrglgn systems. It handles memory allocation, state management, and real-time terminal output processing. By maintaining the Yahunun console active, operatives secure a direct data link back to the core nodes of our cybernetic framework.</p>
+                    <ul>
+                        <li>Simulated CLI parsing architecture</li>
+                        <li>Global state variable stabilization</li>
+                        <li>Secure client-side simulation matrix</li>
+                    </ul>
+                </div>
+
+                <div class="codex-tab-content" id="tab-ayint">
+                    <h3>Ayint Resonance</h3>
+                    <p class="highlight-p">Achieving harmonic balance with dark light fields.</p>
+                    <p>Ayint represents the visual medium. It translates raw numerical vectors directly into neon glowing visuals. Every spark, node connection, and expanding wave inside our canvas visualization operates under strict Ayint spatial laws, preserving perfect kinetic flow and spatial depth.</p>
+                    <ul>
+                        <li>Advanced kinetic collision modeling</li>
+                        <li>Spectral light emissions and glow mapping</li>
+                        <li>Fully responsive screen space adjustments</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 YAHUNUN AYINT // SLEZI ADRGLGN PROJECT. ALL ENGINES ONLINE.</p>
+            <div class="footer-links">
+                <a href="#hero">To Top</a>
+                <span class="divider">|</span>
+                <a href="#generator">Slezi Engine</a>
+                <span class="divider">|</span>
+                <a href="#terminal-section">Mainframe Terminal</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
