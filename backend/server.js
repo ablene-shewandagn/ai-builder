@@ -5,31 +5,36 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 
+const { GoogleGenAI } = require("@google/genai");
+
 const app = express();
 
 app.use(cors());
 
-app.use(express.json({
-  limit: "20mb"
-}));
+app.use(
+  express.json({
+    limit: "20mb"
+  })
+);
 
 
-// =====================================
-// CONFIGURATION
-// =====================================
+// ================================
+// CONFIG
+// ================================
 
 const PORT = process.env.PORT || 5000;
 
-const GEMINI_API_KEY =
-  process.env.GEMINI_API_KEY;
-
-// Current Gemini model
-const GEMINI_MODEL = "gemini-3.5-flash";
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY
+});
 
 
-// =====================================
-// GENERATED PROJECTS FOLDER
-// =====================================
+const GEMINI_MODEL = "gemini-2.0-flash";
+
+
+// ================================
+// GENERATED PROJECTS
+// ================================
 
 const generatedProjectsPath =
   path.join(
@@ -39,167 +44,93 @@ const generatedProjectsPath =
   );
 
 
-// Serve generated projects
 app.use(
   "/generated-projects",
-  express.static(
-    generatedProjectsPath
-  )
+  express.static(generatedProjectsPath)
 );
 
 
-// =====================================
-// TEST ROUTE
-// =====================================
+// ================================
+// TEST
+// ================================
 
 app.get("/", (req, res) => {
 
   res.json({
-
     message:
       "AI Builder Backend is running!"
-
   });
 
 });
 
 
-// =====================================
+// ================================
 // GEMINI FUNCTION
-// =====================================
+// ================================
 
 async function askGemini(prompt) {
 
-  const response = await fetch(
+  try {
 
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+    const response =
+      await ai.models.generateContent({
 
-    {
+        model: GEMINI_MODEL,
 
-      method: "POST",
+        contents: prompt
 
-      headers: {
-
-        "Content-Type":
-          "application/json"
-
-      },
-
-      body: JSON.stringify({
-
-        contents: [
-
-          {
-
-            parts: [
-
-              {
-
-                text: prompt
-
-              }
-
-            ]
-
-          }
-
-        ]
-
-      })
-
-    }
-
-  );
+      });
 
 
-  const data =
-    await response.json();
+    return response.text;
 
 
-  if (!response.ok) {
+  } catch(error) {
 
     console.error(
       "GEMINI ERROR:",
-      data
+      error
     );
 
 
     throw new Error(
-
-      data?.error?.message ||
-
-      "Gemini API request failed"
-
+      error.message ||
+      "Gemini failed"
     );
 
   }
-
-
-  const result =
-
-    data?.candidates?.[0]
-
-      ?.content
-
-      ?.parts?.[0]
-
-      ?.text;
-
-
-  if (!result) {
-
-    throw new Error(
-
-      "Gemini returned empty response"
-
-    );
-
-  }
-
-
-  return result;
 
 }
 
 
-// =====================================
-// AI RESPONSE ROUTE
-// =====================================
+
+// ================================
+// SIMPLE AI ROUTE
+// ================================
 
 app.post(
-
   "/api/ai",
-
-  async (req, res) => {
+  async(req,res)=>{
 
     try {
 
       const {
-
         prompt
-
       } = req.body;
 
 
-      if (!prompt) {
+      if(!prompt){
 
         return res.status(400).json({
-
           error:
-            "Prompt is required"
-
+            "Prompt required"
         });
 
       }
 
 
       const result =
-
-        await askGemini(
-
-          prompt
-
-        );
+        await askGemini(prompt);
 
 
       res.json({
@@ -208,22 +139,12 @@ app.post(
 
       });
 
-    }
 
-    catch (error) {
-
-      console.error(
-
-        "AI ERROR:",
-        error
-
-      );
-
+    }catch(error){
 
       res.status(500).json({
 
         error:
-
           error.message
 
       });
@@ -231,402 +152,237 @@ app.post(
     }
 
   }
-
 );
 
 
-// =====================================
-// GENERATE PROJECT ROUTE
-// =====================================
+
+// ================================
+// GENERATE WEBSITE
+// ================================
 
 app.post(
-
-  "/api/generate-project",
-
-  async (req, res) => {
-
-    try {
-
-      const {
-
-        prompt
-
-      } = req.body;
+"/api/generate-project",
+async(req,res)=>{
 
 
-      if (!prompt) {
-
-        return res.status(400).json({
-
-          error:
-
-            "Website prompt is required"
-
-        });
-
-      }
+try{
 
 
-      console.log(
-
-        "Generating project..."
-
-      );
+const {
+  prompt
+}=req.body;
 
 
-      // ===============================
-      // AI PROMPT
-      // ===============================
 
-      const projectPrompt = `
+if(!prompt){
+
+return res.status(400).json({
+
+error:
+"Website prompt required"
+
+});
+
+}
+
+
+
+const projectPrompt = `
 
 You are a professional web developer.
 
-Build a complete modern website.
+Create a complete website.
 
-USER REQUEST:
+User request:
 
 ${prompt}
 
 
-Return ONLY the following format:
+Return ONLY this format:
+
 
 ---HTML---
 
-[Complete HTML code here]
+complete html
+
 
 ---CSS---
 
-[Complete CSS code here]
+complete css
+
 
 ---JS---
 
-[Complete JavaScript code here]
+complete javascript
 
 
-IMPORTANT RULES:
+Rules:
 
-- Do NOT explain anything.
-- Do NOT use Markdown code fences.
-- Return all three sections.
-- HTML must be complete.
-- HTML must link to style.css.
-- HTML must link to script.js.
-- CSS must be responsive.
-- JavaScript must be functional.
+No markdown.
+No explanation.
+HTML must link style.css.
+HTML must link script.js.
 
 `;
 
-      const aiText =
 
-        await askGemini(
 
-          projectPrompt
+const aiText =
+await askGemini(projectPrompt);
 
-        );
 
 
-      console.log(
+// remove markdown
 
-        "AI RESPONSE RECEIVED"
+const clean =
+aiText
+.replace(/```html/gi,"")
+.replace(/```css/gi,"")
+.replace(/```javascript/gi,"")
+.replace(/```js/gi,"")
+.replace(/```/g,"")
+.trim();
 
-      );
 
 
-      // ===============================
-      // CLEAN RESPONSE
-      // ===============================
-
-      const cleanText =
-
-        aiText
-
-          .replace(
-
-            /```html/gi,
-
-            ""
-
-          )
-
-          .replace(
-
-            /```css/gi,
-
-            ""
-
-          )
-
-          .replace(
-
-            /```javascript/gi,
-
-            ""
-
-          )
-
-          .replace(
-
-            /```js/gi,
-
-            ""
-
-          )
-
-          .replace(
-
-            /```/g,
-
-            ""
-
-          )
-
-          .trim();
-
-
-      // ===============================
-      // EXTRACT HTML
-      // ===============================
-
-      const htmlMatch =
-
-        cleanText.match(
-
-          /---HTML---([\s\S]*?)---CSS---/i
-
-        );
-
-
-      // ===============================
-      // EXTRACT CSS
-      // ===============================
-
-      const cssMatch =
-
-        cleanText.match(
-
-          /---CSS---([\s\S]*?)---JS---/i
-
-        );
-
-
-      // ===============================
-      // EXTRACT JS
-      // ===============================
-
-      const jsMatch =
-
-        cleanText.match(
-
-          /---JS---([\s\S]*)/i
-
-        );
-
-
-      if (
-
-        !htmlMatch ||
-
-        !cssMatch ||
-
-        !jsMatch
-
-      ) {
-
-        console.error(
-
-          "INVALID AI PROJECT FORMAT"
-
-        );
-
-
-        console.log(
-
-          aiText
-
-        );
-
-
-        return res.status(500).json({
-
-          error:
-
-            "AI returned invalid project format"
-
-        });
-
-      }
-
-
-      const html =
-
-        htmlMatch[1].trim();
-
-
-      const css =
-
-        cssMatch[1].trim();
-
-
-      const js =
-
-        jsMatch[1].trim();
-
-
-      // ===============================
-      // CREATE PROJECT FOLDER
-      // ===============================
-
-      const projectPath =
-
-        path.join(
-
-          generatedProjectsPath,
-
-          "my-project"
-
-        );
-
-
-      fs.mkdirSync(
-
-        projectPath,
-
-        {
-
-          recursive: true
-
-        }
-
-      );
-
-
-      // ===============================
-      // SAVE HTML
-      // ===============================
-
-      fs.writeFileSync(
-
-        path.join(
-
-          projectPath,
-
-          "index.html"
-
-        ),
-
-        html,
-
-        "utf8"
-
-      );
-
-
-      // ===============================
-      // SAVE CSS
-      // ===============================
-
-      fs.writeFileSync(
-
-        path.join(
-
-          projectPath,
-
-          "style.css"
-
-        ),
-
-        css,
-
-        "utf8"
-
-      );
-
-
-      // ===============================
-      // SAVE JAVASCRIPT
-      // ===============================
-
-      fs.writeFileSync(
-
-        path.join(
-
-          projectPath,
-
-          "script.js"
-
-        ),
-
-        js,
-
-        "utf8"
-
-      );
-
-
-      console.log(
-
-        "PROJECT CREATED SUCCESSFULLY"
-
-      );
-
-
-      res.json({
-
-        message:
-
-          "Project generated successfully",
-
-       previewUrl:
-  `${req.protocol}://${req.get("host")}/generated-projects/my-project/index.html`
-      });
-
-    }
-
-    catch (error) {
-
-      console.error(
-
-        "PROJECT ERROR:",
-
-        error
-
-      );
-
-
-      res.status(500).json({
-
-        error:
-
-          error.message ||
-
-          "Project generation failed"
-
-      });
-
-    }
-
-  }
-
+const htmlMatch =
+clean.match(
+/---HTML---([\s\S]*?)---CSS---/i
 );
 
 
-// =====================================
-// START SERVER
-// =====================================
+const cssMatch =
+clean.match(
+/---CSS---([\s\S]*?)---JS---/i
+);
+
+
+const jsMatch =
+clean.match(
+/---JS---([\s\S]*)/i
+);
+
+
+
+if(
+!htmlMatch ||
+!cssMatch ||
+!jsMatch
+){
+
+return res.status(500).json({
+
+error:
+"Invalid AI format"
+
+});
+
+}
+
+
+
+const html =
+htmlMatch[1].trim();
+
+
+const css =
+cssMatch[1].trim();
+
+
+const js =
+jsMatch[1].trim();
+
+
+
+// create folder
+
+const projectPath =
+path.join(
+generatedProjectsPath,
+"my-project"
+);
+
+
+
+fs.mkdirSync(
+projectPath,
+{
+recursive:true
+}
+);
+
+
+
+// save files
+
+fs.writeFileSync(
+path.join(projectPath,"index.html"),
+html
+);
+
+
+fs.writeFileSync(
+path.join(projectPath,"style.css"),
+css
+);
+
+
+fs.writeFileSync(
+path.join(projectPath,"script.js"),
+js
+);
+
+
+
+res.json({
+
+message:
+"Project generated successfully",
+
+
+previewUrl:
+`${req.protocol}://${req.get("host")}/generated-projects/my-project/index.html`
+
+});
+
+
+
+}catch(error){
+
+
+console.error(
+"PROJECT ERROR:",
+error
+);
+
+
+res.status(500).json({
+
+error:
+error.message
+
+});
+
+
+}
+
+
+});
+
+
+
+
+// ================================
+// START
+// ================================
+
 
 app.listen(
+PORT,
+()=>{
 
-  PORT,
-
-  () => {
-
-    console.log(
-
-      `Server running on http://localhost:${PORT}`
-
-    );
-
-  }
-
+console.log(
+`Server running on port ${PORT}`
 );
+
+});
