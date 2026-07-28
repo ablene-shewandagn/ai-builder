@@ -6,7 +6,6 @@ const fs = require("fs");
 const path = require("path");
 const OpenAI = require("openai");
 
-
 const app = express();
 
 app.use(cors());
@@ -40,32 +39,25 @@ const OPENAI_MODEL = "gpt-5.5-mini";
 // GENERATED PROJECTS
 // =============================
 
-const generatedProjectsPath =
-
-  path.join(
-    __dirname,
-    "..",
-    "generated-projects"
-  );
+const generatedProjectsPath = path.join(
+  __dirname,
+  "..",
+  "generated-projects"
+);
 
 
 app.use(
-
   "/generated-projects",
-
-  express.static(
-    generatedProjectsPath
-  )
-
+  express.static(generatedProjectsPath)
 );
 
 
 
 // =============================
-// TEST
+// TEST ROUTE
 // =============================
 
-app.get("/", (req,res)=>{
+app.get("/", (req, res)=>{
 
   res.json({
 
@@ -86,9 +78,7 @@ async function askAI(prompt){
 
   try{
 
-
     const response =
-
       await client.responses.create({
 
         model: OPENAI_MODEL,
@@ -98,31 +88,18 @@ async function askAI(prompt){
       });
 
 
-
     return response.output_text;
-
 
 
   }catch(error){
 
-
     console.error(
-
       "OPENAI ERROR:",
-
-      error
-
+      error.message
     );
 
 
-    throw new Error(
-
-      error.message ||
-
-      "OpenAI request failed"
-
-    );
-
+    throw error;
 
   }
 
@@ -131,67 +108,53 @@ async function askAI(prompt){
 
 
 // =============================
-// AI CHAT ROUTE
+// AI CHAT
 // =============================
 
 app.post(
-
 "/api/ai",
-
 async(req,res)=>{
 
+  try{
 
-try{
-
-
-const {
-
-prompt
-
-}=req.body;
+    const { prompt } = req.body;
 
 
+    if(!prompt){
 
-if(!prompt){
+      return res.status(400).json({
 
-return res.status(400).json({
+        error:
+        "Prompt is required"
 
-error:
-"Prompt required"
+      });
 
-});
-
-}
-
+    }
 
 
-const result =
-
-await askAI(prompt);
-
+    const result =
+      await askAI(prompt);
 
 
-res.json({
+    res.json({
 
-result
+      result
 
-});
-
-
-
-}catch(error){
+    });
 
 
-res.status(500).json({
-
-error:
-error.message
-
-});
+  }catch(error){
 
 
-}
+    res.status(500).json({
 
+      error:
+      error.message
+
+    });
+
+
+  }
 
 });
 
@@ -199,26 +162,18 @@ error.message
 
 
 // =============================
-// GENERATE WEBSITE
+// GENERATE PROJECT
 // =============================
-
 
 app.post(
-
 "/api/generate-project",
-
 async(req,res)=>{
 
 
 try{
 
 
-const {
-
-prompt
-
-}=req.body;
-
+const { prompt } = req.body;
 
 
 if(!prompt){
@@ -226,7 +181,7 @@ if(!prompt){
 return res.status(400).json({
 
 error:
-"Website prompt required"
+"Website prompt is required"
 
 });
 
@@ -236,43 +191,38 @@ error:
 
 const projectPrompt = `
 
-
 You are a professional web developer.
-
 
 Create a complete modern website.
 
-
-USER REQUEST:
+User request:
 
 ${prompt}
 
 
-Return ONLY this format:
-
+Return ONLY:
 
 ---HTML---
 
-Complete HTML code
+HTML CODE
 
 
 ---CSS---
 
-Complete CSS code
+CSS CODE
 
 
 ---JS---
 
-Complete JavaScript code
-
+JAVASCRIPT CODE
 
 
 Rules:
 
-- Do not explain.
-- Do not use markdown.
-- HTML must link style.css.
-- HTML must link script.js.
+- No explanation.
+- No markdown.
+- HTML must connect style.css.
+- HTML must connect script.js.
 - CSS must be responsive.
 - JavaScript must work.
 
@@ -281,200 +231,117 @@ Rules:
 
 
 const aiText =
-
 await askAI(projectPrompt);
 
 
 
-// remove markdown
-
 const cleanText =
-
 aiText
-
 .replace(/```html/gi,"")
-
 .replace(/```css/gi,"")
-
 .replace(/```javascript/gi,"")
-
 .replace(/```js/gi,"")
-
 .replace(/```/g,"")
-
 .trim();
 
 
 
-
-
 const htmlMatch =
-
 cleanText.match(
-
 /---HTML---([\s\S]*?)---CSS---/i
-
 );
-
 
 
 const cssMatch =
-
 cleanText.match(
-
 /---CSS---([\s\S]*?)---JS---/i
-
 );
-
 
 
 const jsMatch =
-
 cleanText.match(
-
 /---JS---([\s\S]*)/i
-
 );
-
-
 
 
 
 if(
-
 !htmlMatch ||
-
 !cssMatch ||
-
 !jsMatch
-
 ){
-
 
 return res.status(500).json({
 
 error:
-
 "AI returned invalid format"
 
 });
-
 
 }
 
 
 
-
 const html =
-
 htmlMatch[1].trim();
 
 
 const css =
-
 cssMatch[1].trim();
 
 
 const js =
-
 jsMatch[1].trim();
 
 
 
 
-
 const projectPath =
-
 path.join(
-
 generatedProjectsPath,
-
 "my-project"
-
 );
 
 
 
 fs.mkdirSync(
-
 projectPath,
-
 {
-
 recursive:true
-
 }
-
 );
 
 
 
-
-
 fs.writeFileSync(
-
-path.join(
-
-projectPath,
-
-"index.html"
-
-),
-
+path.join(projectPath,"index.html"),
 html
-
 );
 
 
-
 fs.writeFileSync(
-
-path.join(
-
-projectPath,
-
-"style.css"
-
-),
-
+path.join(projectPath,"style.css"),
 css
-
 );
-
 
 
 fs.writeFileSync(
-
-path.join(
-
-projectPath,
-
-"script.js"
-
-),
-
+path.join(projectPath,"script.js"),
 js
-
 );
-
-
 
 
 
 res.json({
 
 message:
-
 "Project generated successfully",
 
 
 previewUrl:
-
 `${req.protocol}://${req.get("host")}/generated-projects/my-project/index.html`
 
 });
-
-
 
 
 
@@ -482,11 +349,8 @@ previewUrl:
 
 
 console.error(
-
 "PROJECT ERROR:",
-
-error
-
+error.message
 );
 
 
@@ -494,7 +358,6 @@ error
 res.status(500).json({
 
 error:
-
 error.message
 
 });
@@ -513,19 +376,11 @@ error.message
 // =============================
 
 app.listen(
-
 PORT,
-
 ()=>{
 
-
 console.log(
-
 `Server running on port ${PORT}`
-
 );
 
-
-}
-
-);
+});
