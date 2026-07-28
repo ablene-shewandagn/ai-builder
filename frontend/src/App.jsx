@@ -50,7 +50,7 @@ function App() {
 
       const response = await fetch(
 
-        "http://localhost:5000/api/ai",
+        "https://ai-builder-y6jo.onrender.com/api/ai",
 
         {
 
@@ -147,8 +147,7 @@ function App() {
 
 
       const response = await fetch(
-
-        "http://localhost:5000/api/generate-project",
+  "https://ai-builder-y6jo.onrender.com/api/generate-project",
 
         {
 
