@@ -29,7 +29,7 @@ const ai = new GoogleGenAI({
 });
 
 
-const GEMINI_MODEL = "gemini-2.0-flash";
+const GEMINI_MODEL = "gemini-2.5-flash";
 
 
 // ================================
