@@ -4,9 +4,11 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
-const OpenAI = require("openai");
+const Groq = require("groq-sdk");
+
 
 const app = express();
+
 
 app.use(cors());
 
@@ -24,14 +26,14 @@ app.use(
 const PORT = process.env.PORT || 5000;
 
 
-const client = new OpenAI({
+const client = new Groq({
 
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.GROQ_API_KEY
 
 });
 
 
-const OPENAI_MODEL = "gpt-5-mini";
+const AI_MODEL = "llama-3.3-70b-versatile";
 
 
 
@@ -57,7 +59,7 @@ app.use(
 // TEST ROUTE
 // =============================
 
-app.get("/", (req, res)=>{
+app.get("/", (req,res)=>{
 
   res.json({
 
@@ -71,35 +73,63 @@ app.get("/", (req, res)=>{
 
 
 // =============================
-// OPENAI FUNCTION
+// GROQ AI FUNCTION
 // =============================
 
 async function askAI(prompt){
 
   try{
 
+
     const response =
-      await client.responses.create({
 
-        model: OPENAI_MODEL,
+      await client.chat.completions.create({
 
-        input: prompt
+        model: AI_MODEL,
+
+
+        messages:[
+
+          {
+
+            role:"user",
+
+            content:prompt
+
+          }
+
+        ]
 
       });
 
 
-    return response.output_text;
+
+    return response.choices[0]
+      .message
+      .content;
+
 
 
   }catch(error){
 
+
     console.error(
-      "OPENAI ERROR:",
+
+      "GROQ ERROR:",
+
       error.message
+
     );
 
 
-    throw error;
+    throw new Error(
+
+      error.message ||
+
+      "Groq request failed"
+
+    );
+
 
   }
 
@@ -108,53 +138,60 @@ async function askAI(prompt){
 
 
 // =============================
-// AI CHAT
+// AI CHAT ROUTE
 // =============================
 
 app.post(
 "/api/ai",
 async(req,res)=>{
 
-  try{
 
-    const { prompt } = req.body;
-
-
-    if(!prompt){
-
-      return res.status(400).json({
-
-        error:
-        "Prompt is required"
-
-      });
-
-    }
+try{
 
 
-    const result =
-      await askAI(prompt);
+const {prompt}=req.body;
 
 
-    res.json({
 
-      result
+if(!prompt){
 
-    });
+return res.status(400).json({
 
+error:
+"Prompt is required"
 
-  }catch(error){
+});
 
-
-    res.status(500).json({
-
-      error:
-      error.message
-
-    });
+}
 
 
-  }
+
+const result =
+await askAI(prompt);
+
+
+
+res.json({
+
+result
+
+});
+
+
+
+}catch(error){
+
+
+res.status(500).json({
+
+error:
+error.message
+
+});
+
+
+}
+
 
 });
 
@@ -162,7 +199,7 @@ async(req,res)=>{
 
 
 // =============================
-// GENERATE PROJECT
+// GENERATE PROJECT ROUTE
 // =============================
 
 app.post(
@@ -173,7 +210,8 @@ async(req,res)=>{
 try{
 
 
-const { prompt } = req.body;
+const {prompt}=req.body;
+
 
 
 if(!prompt){
@@ -195,32 +233,33 @@ You are a professional web developer.
 
 Create a complete modern website.
 
-User request:
+USER REQUEST:
 
 ${prompt}
 
 
-Return ONLY:
+Return ONLY this format:
+
 
 ---HTML---
 
-HTML CODE
+Complete HTML code
 
 
 ---CSS---
 
-CSS CODE
+Complete CSS code
 
 
 ---JS---
 
-JAVASCRIPT CODE
+Complete JavaScript code
 
 
 Rules:
 
-- No explanation.
-- No markdown.
+- Do not explain.
+- Do not use markdown.
 - HTML must connect style.css.
 - HTML must connect script.js.
 - CSS must be responsive.
@@ -235,14 +274,25 @@ await askAI(projectPrompt);
 
 
 
+
+
 const cleanText =
+
 aiText
+
 .replace(/```html/gi,"")
+
 .replace(/```css/gi,"")
+
 .replace(/```javascript/gi,"")
+
 .replace(/```js/gi,"")
+
 .replace(/```/g,"")
+
 .trim();
+
+
 
 
 
@@ -252,10 +302,12 @@ cleanText.match(
 );
 
 
+
 const cssMatch =
 cleanText.match(
 /---CSS---([\s\S]*?)---JS---/i
 );
+
 
 
 const jsMatch =
@@ -265,20 +317,30 @@ cleanText.match(
 
 
 
+
+
 if(
+
 !htmlMatch ||
+
 !cssMatch ||
+
 !jsMatch
+
 ){
+
 
 return res.status(500).json({
 
 error:
-"AI returned invalid format"
+"AI returned invalid project format"
 
 });
 
+
 }
+
+
 
 
 
@@ -296,61 +358,120 @@ jsMatch[1].trim();
 
 
 
+
+
 const projectPath =
+
 path.join(
+
 generatedProjectsPath,
+
 "my-project"
+
 );
+
+
 
 
 
 fs.mkdirSync(
+
 projectPath,
+
 {
+
 recursive:true
+
 }
+
 );
 
 
 
+
+
 fs.writeFileSync(
-path.join(projectPath,"index.html"),
+
+path.join(
+
+projectPath,
+
+"index.html"
+
+),
+
 html
+
 );
 
 
+
+
+
 fs.writeFileSync(
-path.join(projectPath,"style.css"),
+
+path.join(
+
+projectPath,
+
+"style.css"
+
+),
+
 css
+
 );
+
+
+
 
 
 fs.writeFileSync(
-path.join(projectPath,"script.js"),
+
+path.join(
+
+projectPath,
+
+"script.js"
+
+),
+
 js
+
 );
+
+
+
 
 
 
 res.json({
 
 message:
+
 "Project generated successfully",
 
 
 previewUrl:
+
 `${req.protocol}://${req.get("host")}/generated-projects/my-project/index.html`
 
 });
 
 
 
+
+
 }catch(error){
 
 
+
 console.error(
+
 "PROJECT ERROR:",
+
 error.message
+
 );
 
 
@@ -358,6 +479,7 @@ error.message
 res.status(500).json({
 
 error:
+
 error.message
 
 });
@@ -376,11 +498,17 @@ error.message
 // =============================
 
 app.listen(
+
 PORT,
+
 ()=>{
 
+
 console.log(
+
 `Server running on port ${PORT}`
+
 );
+
 
 });
