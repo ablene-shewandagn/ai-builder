@@ -31,7 +31,7 @@ const client = new OpenAI({
 });
 
 
-const OPENAI_MODEL = "gpt-5.5-mini";
+const OPENAI_MODEL = "gpt-5-mini";
 
 
 
