@@ -1,372 +1,174 @@
-import { useState } from "react";
-
+import {useState} from "react";
 import "./App.css";
 
 
-function App() {
+function App(){
 
+const [prompt,setPrompt]=useState("");
 
-  const [prompt, setPrompt] =
-    useState("");
+const [message,setMessage]=useState("");
 
+const [previewUrl,setPreviewUrl]=useState("");
 
-  const [result, setResult] =
-    useState("");
+const [loading,setLoading]=useState(false);
 
 
-  const [loading, setLoading] =
-    useState(false);
 
+async function generate(){
 
-  const [projectLoading, setProjectLoading] =
-    useState(false);
 
+setLoading(true);
 
-  // ===============================
-  // GENERATE WEBSITE / AI RESPONSE
-  // ===============================
+setMessage("");
 
-  async function generateWebsite() {
+setPreviewUrl("");
 
 
-    if (!prompt.trim()) {
 
-      alert(
-        "Please describe your website first"
-      );
+try{
 
-      return;
 
-    }
+const res = await fetch(
 
+"https://ai-builder-y6jo.onrender.com/api/generate-project",
 
-    setLoading(true);
+{
 
-    setResult("");
+method:"POST",
 
+headers:{
 
-    try {
+"Content-Type":"application/json"
 
+},
 
-      const response = await fetch(
+body:JSON.stringify({
 
-        "https://ai-builder-y6jo.onrender.com/api/ai",
+prompt
 
-        {
+})
 
-          method: "POST",
+}
 
-          headers: {
+);
 
-            "Content-Type":
-              "application/json"
 
-          },
 
-          body: JSON.stringify({
+const data = await res.json();
 
-            prompt: prompt
 
-          })
 
-        }
+console.log(data);
 
-      );
 
 
-      const data =
-        await response.json();
+setMessage(
 
+data.message || data.error
 
-      if (!response.ok) {
+);
 
-        throw new Error(
 
-          data.error ||
-          "AI request failed"
 
-        );
+if(data.previewUrl){
 
-      }
+setPreviewUrl(data.previewUrl);
 
+}
 
-      setResult(
 
-        data.result ||
-        "No response received"
 
-      );
+}catch(err){
 
 
-    } catch (error) {
+setMessage(
+"❌ "+err.message
+);
 
 
-      setResult(
+}
 
-        "❌ " +
-        error.message
 
-      );
+setLoading(false);
 
 
-    } finally {
+}
 
 
-      setLoading(false);
 
+return(
 
-    }
+<div className="app">
 
-  }
 
+<h1>
+🧠 Ablene AI Builder
+</h1>
 
-  // ===============================
-  // GENERATE AI PROJECT
-  // ===============================
 
-  async function generateProject() {
+<textarea
 
+placeholder="Describe your website..."
 
-    if (!prompt.trim()) {
+value={prompt}
 
-      alert(
+onChange={(e)=>setPrompt(e.target.value)}
 
-        "Please describe your website first"
+/>
 
-      );
 
-      return;
 
-    }
+<br/>
 
 
-    setProjectLoading(true);
+<button onClick={generate}>
 
+{
 
-    try {
+loading ?
 
+"Generating..."
 
-      const response = await fetch(
-  "https://ai-builder-y6jo.onrender.com/api/generate-project",
+:
 
-        {
+"Generate Website"
 
-          method: "POST",
+}
 
-          headers: {
+</button>
 
-            "Content-Type":
-              "application/json"
 
-          },
 
-          body: JSON.stringify({
+<h3>
+{message}
+</h3>
 
-            prompt: prompt
 
-          })
 
-        }
+{
 
-      );
+previewUrl &&
 
+<iframe
 
-      const data =
-        await response.json();
+src={previewUrl}
 
+title="Generated Website"
 
-      if (!response.ok) {
+width="100%"
 
-        throw new Error(
+height="700"
 
-          data.error ||
+/>
 
-          "Project generation failed"
+}
 
-        );
 
-      }
 
-
-      alert(
-
-        "✅ " +
-        data.message
-
-      );
-
-
-      if (data.previewUrl) {
-
-        window.open(
-
-          data.previewUrl,
-
-          "_blank"
-
-        );
-
-      }
-
-
-    } catch (error) {
-
-
-      console.error(
-
-        "PROJECT ERROR:",
-
-        error
-
-      );
-
-
-      alert(
-
-        "❌ " +
-        error.message
-
-      );
-
-
-    } finally {
-
-
-      setProjectLoading(false);
-
-
-    }
-
-  }
-
-
-  // ===============================
-  // USER INTERFACE
-  // ===============================
-
-  return (
-
-    <div className="app">
-
-
-      <div className="brand">
-  <img
-    src="1000033871.png"
-    alt="Ablene"
-    className="profile-photo"
-  />
-
-  <h1>Ablene AI Builder</h1>
 </div>
 
+);
 
-      <p>
-
-        Describe the website or app
-
-        you want to build
-
-      </p>
-
-
-      <textarea
-
-        placeholder=
-
-          "Example: Build a modern school management website..."
-
-        value={prompt}
-
-        onChange={
-
-          (event) =>
-
-            setPrompt(
-
-              event.target.value
-
-            )
-
-        }
-
-      />
-
-
-      <div className="buttons">
-
-
-        <button
-
-          onClick={
-
-            generateWebsite
-
-          }
-
-          disabled={loading}
-
-        >
-
-          {loading
-
-            ? "🧠 Ablene's AI Thinking..."
-
-            : "🧠 Generate Website"
-
-          }
-
-        </button>
-
-
-        <button
-
-          onClick={
-
-            generateProject
-
-          }
-
-          disabled={projectLoading}
-
-        >
-
-          {projectLoading
-
-            ? "🤖 Ablene's AI Building..."
-
-            : "📁 Generate Project"
-
-          }
-
-        </button>
-
-
-      </div>
-
-
-      <div className="result">
-
-
-        <h2>
-
-          🧠 Ablene's AI Brain Response
-
-        </h2>
-
-
-        <pre>
-
-          {result}
-
-        </pre>
-
-
-      </div>
-
-
-    </div>
-
-  );
 
 }
 

@@ -26,7 +26,7 @@ app.use(
 const PORT = process.env.PORT || 5000;
 
 
-const client = new Groq({
+const groq = new Groq({
 
   apiKey: process.env.GROQ_API_KEY
 
@@ -43,23 +43,37 @@ const AI_MODEL = "llama-3.3-70b-versatile";
 
 const generatedProjectsPath = path.join(
   __dirname,
-  "..",
   "generated-projects"
 );
 
 
+if(!fs.existsSync(generatedProjectsPath)){
+
+  fs.mkdirSync(
+    generatedProjectsPath,
+    {
+      recursive:true
+    }
+  );
+
+}
+
+
+
 app.use(
   "/generated-projects",
-  express.static(generatedProjectsPath)
+  express.static(
+    generatedProjectsPath
+  )
 );
 
 
 
 // =============================
-// TEST ROUTE
+// TEST
 // =============================
 
-app.get("/", (req,res)=>{
+app.get("/",(req,res)=>{
 
   res.json({
 
@@ -73,133 +87,41 @@ app.get("/", (req,res)=>{
 
 
 // =============================
-// GROQ AI FUNCTION
+// AI FUNCTION
 // =============================
 
 async function askAI(prompt){
 
-  try{
+
+const response = await groq.chat.completions.create({
+
+model: AI_MODEL,
 
 
-    const response =
+messages:[
 
-      await client.chat.completions.create({
+{
 
-        model: AI_MODEL,
+role:"user",
 
+content:prompt
 
-        messages:[
+}
 
-          {
+]
 
-            role:"user",
-
-            content:prompt
-
-          }
-
-        ]
-
-      });
+});
 
 
+return response.choices[0].message.content;
 
-    return response.choices[0]
-      .message
-      .content;
-
-
-
-  }catch(error){
-
-
-    console.error(
-
-      "GROQ ERROR:",
-
-      error.message
-
-    );
-
-
-    throw new Error(
-
-      error.message ||
-
-      "Groq request failed"
-
-    );
-
-
-  }
 
 }
 
 
 
 // =============================
-// AI CHAT ROUTE
-// =============================
-
-app.post(
-"/api/ai",
-async(req,res)=>{
-
-
-try{
-
-
-const {prompt}=req.body;
-
-
-
-if(!prompt){
-
-return res.status(400).json({
-
-error:
-"Prompt is required"
-
-});
-
-}
-
-
-
-const result =
-await askAI(prompt);
-
-
-
-res.json({
-
-result
-
-});
-
-
-
-}catch(error){
-
-
-res.status(500).json({
-
-error:
-error.message
-
-});
-
-
-}
-
-
-});
-
-
-
-
-// =============================
-// GENERATE PROJECT ROUTE
+// GENERATE WEBSITE
 // =============================
 
 app.post(
@@ -219,7 +141,7 @@ if(!prompt){
 return res.status(400).json({
 
 error:
-"Website prompt is required"
+"Prompt required"
 
 });
 
@@ -227,58 +149,39 @@ error:
 
 
 
-const projectPrompt = `
+const aiPrompt = `
 
-You are a professional web developer.
+Create a complete website.
 
-Create a complete modern website.
-
-USER REQUEST:
+User request:
 
 ${prompt}
 
 
-Return ONLY this format:
-
+Return only:
 
 ---HTML---
-
-Complete HTML code
-
+html code
 
 ---CSS---
-
-Complete CSS code
-
+css code
 
 ---JS---
+javascript code
 
-Complete JavaScript code
 
-
-Rules:
-
-- Do not explain.
-- Do not use markdown.
-- HTML must connect style.css.
-- HTML must connect script.js.
-- CSS must be responsive.
-- JavaScript must work.
+No explanation.
+No markdown.
 
 `;
 
 
 
-const aiText =
-await askAI(projectPrompt);
+const aiText = await askAI(aiPrompt);
 
 
 
-
-
-const cleanText =
-
-aiText
+const clean = aiText
 
 .replace(/```html/gi,"")
 
@@ -297,21 +200,21 @@ aiText
 
 
 const htmlMatch =
-cleanText.match(
+clean.match(
 /---HTML---([\s\S]*?)---CSS---/i
 );
 
 
 
 const cssMatch =
-cleanText.match(
+clean.match(
 /---CSS---([\s\S]*?)---JS---/i
 );
 
 
 
 const jsMatch =
-cleanText.match(
+clean.match(
 /---JS---([\s\S]*)/i
 );
 
@@ -320,23 +223,17 @@ cleanText.match(
 
 
 if(
-
 !htmlMatch ||
-
 !cssMatch ||
-
 !jsMatch
-
 ){
-
 
 return res.status(500).json({
 
 error:
-"AI returned invalid project format"
+"Invalid AI format"
 
 });
-
 
 }
 
@@ -344,33 +241,13 @@ error:
 
 
 
-const html =
-htmlMatch[1].trim();
-
-
-const css =
-cssMatch[1].trim();
-
-
-const js =
-jsMatch[1].trim();
-
-
-
-
-
-
-const projectPath =
-
-path.join(
+const projectPath = path.join(
 
 generatedProjectsPath,
 
 "my-project"
 
 );
-
-
 
 
 
@@ -400,11 +277,9 @@ projectPath,
 
 ),
 
-html
+htmlMatch[1].trim()
 
 );
-
-
 
 
 
@@ -418,11 +293,9 @@ projectPath,
 
 ),
 
-css
+cssMatch[1].trim()
 
 );
-
-
 
 
 
@@ -436,10 +309,17 @@ projectPath,
 
 ),
 
-js
+jsMatch[1].trim()
 
 );
 
+
+
+
+
+const previewUrl =
+
+`${req.protocol}://${req.get("host")}/generated-projects/my-project/index.html`;
 
 
 
@@ -451,10 +331,7 @@ message:
 
 "Project generated successfully",
 
-
-previewUrl:
-
-`${req.protocol}://${req.get("host")}/generated-projects/my-project/index.html`
+previewUrl
 
 });
 
@@ -465,22 +342,12 @@ previewUrl:
 }catch(error){
 
 
-
-console.error(
-
-"PROJECT ERROR:",
-
-error.message
-
-);
-
+console.error(error);
 
 
 res.status(500).json({
 
-error:
-
-error.message
+error:error.message
 
 });
 
@@ -493,9 +360,6 @@ error.message
 
 
 
-// =============================
-// START SERVER
-// =============================
 
 app.listen(
 
@@ -511,4 +375,6 @@ console.log(
 );
 
 
-});
+}
+
+);
