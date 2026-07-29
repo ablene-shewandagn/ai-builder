@@ -118,7 +118,34 @@ return response.choices[0].message.content;
 
 }
 
+// =============================
+// AI CHAT
+// =============================
 
+app.post("/api/ai", async (req, res) => {
+  try {
+    const { prompt } = req.body;
+
+    if (!prompt) {
+      return res.status(400).json({
+        error: "Prompt required"
+      });
+    }
+
+    const result = await askAI(prompt);
+
+    res.json({
+      result
+    });
+
+  } catch (error) {
+    console.error("AI ERROR:", error);
+
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
 
 // =============================
 // GENERATE WEBSITE
