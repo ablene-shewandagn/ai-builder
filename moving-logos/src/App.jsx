@@ -1,4 +1,4 @@
-import "./app.css";
+import "./App.css";
 
 const logos = [
   "/logo1.png",
@@ -9,11 +9,13 @@ const logos = [
 ];
 
 export default function LogoSlider() {
+  const repeatedLogos = [...logos, ...logos];
+
   return (
-    <div className="slider">
+    <div className="slider" aria-label="Brand logo carousel">
       <div className="slide-track">
-        {[...logos, ...logos].map((logo, index) => (
-          <div className="slide" key={index}>
+        {repeatedLogos.map((logo, index) => (
+          <div className="slide" key={`${logo}-${index}`}>
             <img src={logo} alt="" />
           </div>
         ))}
